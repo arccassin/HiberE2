@@ -5,6 +5,8 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
+import java.util.List;
+
 /**
  * Created by User on 15 Сент., 2019
  */
@@ -18,10 +20,8 @@ public class Main {
         Session session = sessionFactory.openSession();
 
         Course course = session.get(Course.class, 1);
-        System.out.printf("Курс %s имеет стоимость %s руб. и продолжительность в часах: %s%n",
-                course.getName(),
-                course.getPrice(),
-                course.getDuration());
+
+        course.getStudents().stream().forEach(student -> student.getName());
 
         sessionFactory.close();
     }
