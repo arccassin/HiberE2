@@ -16,33 +16,33 @@ public class Subscription {
     @Embeddable
     public static class Id implements Serializable {
 
-        @Column(name = "student_id")
-        protected int studentId;
+//        @Column(name = "student_id")
+        protected Student student;
 
-        @Column(name = "course_id")
-        protected int courseId;
+//        @Column(name = "course_id")
+        protected Course course;
 
         public Id() {
         }
 
-        public Id(int studentId, int courseId) {
-            this.courseId = courseId;
-            this.studentId = studentId;
+        public Id(Student student, Course course) {
+            this.student = student;
+            this.course = course;
         }
 
         @Override
         public boolean equals(Object o) {
             if (o != null && (o instanceof Id)){
                 Id that = (Id) o;
-                return this.studentId == that.studentId
-                        && this.courseId == that.courseId;
+                return this.student == that.student
+                        && this.course == that.course;
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(studentId, courseId);
+            return Objects.hash(student, course);
         }
     }
 
@@ -73,8 +73,8 @@ public class Subscription {
             Student student,
             Course course) {
         this.subscriptionDate = subscriptionDate;
-        this.id.courseId = course.getId();
-        this.id.studentId = student.getId();
+        this.id.course = course;
+        this.id.student = student;
 
         course.getSubscriptions().add(this);
         student.getSubscriptions().add(this);
