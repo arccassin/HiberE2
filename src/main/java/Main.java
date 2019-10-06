@@ -1,5 +1,6 @@
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
@@ -21,20 +22,44 @@ public class Main {
         Session session = sessionFactory.openSession();
 
         try {
-            Course course = session.get(Course.class, 1);
+            String sql = "From " + PurchaseListEntity.class.getSimpleName();
 
-//        course.getStudents().stream().forEach(student -> student.getName());
-            System.out.println("Start my code");
-            List<Subscription> courseSubscriptions = course.getSubscriptions(); //.stream().forEach(s -> s.student.getName());
-            for (int i = 0; i < courseSubscriptions.size(); i++) {
-                Subscription sub = courseSubscriptions.get(i);
-                Student student = sub.student;
-                System.out.println("Студент " + student.getName() + " начал курс " + sub.subscriptionDate.toString());
+            Transaction transaction = session.beginTransaction();
+
+            sql = "from " + PurchaseListEntity.class.getSimpleName() + " p " +
+                    "join " + Course.class.getSimpleName() + " c on c.name=p.courseName " +
+                    "join " + Student.class.getSimpleName() + " s on s.name=p.studentName";
+            try {
+                List<Object[]> resultPurchaseList = session.createQuery(sql).list();
+                for (Object[] omas : resultPurchaseList) {
+                    Purchase purchase = new Purchase();
+                    Course course = null;
+                    Student student = null;
+                    PurchaseListEntity purchaseListEntity = null;
+
+                    for (Object o : omas) {
+                        if (o instanceof Course) {
+                            course = (Course) o;
+                        }
+                        if (o instanceof Student) {
+                            student = (Student) o;
+                        }
+                        if (o instanceof PurchaseListEntity) {
+                            purchaseListEntity = (PurchaseListEntity) o;
+                        }
+                    }
+
+                    purchase.setCourse(course);
+                    purchase.setStudent(student);
+                    purchase.setPrice(course.getPrice());
+                    purchase.setSubscriptionDate(purchaseListEntity.getSubscriptionDate());
+                    session.save(purchase);
+                }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
             }
-
-            System.out.println("Finish my code");
-
-        }finally {
+            transaction.commit();
+        } finally {
             session.close();
             sessionFactory.close();
         }
